@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildVideosUrl, fetchVideos } from '../scripts/api.js';
+import { buildVideosUrl, fetchVideos, normalizeVideosResponse } from '../scripts/api.js';
 
 test('builds the default first-page API URL', () => {
   const url = buildVideosUrl();
@@ -11,14 +11,25 @@ test('builds the default first-page API URL', () => {
   assert.equal(url.searchParams.get('pagination[page]'), '1');
 });
 
-test('returns parsed JSON for a successful response', async () => {
-  const payload = { results: [] };
+test('returns normalized videos and pagination for a successful response', async () => {
+  const video = { id: 1, city: 'Москва', video: { url: '/v.mp4' }, poster: { url: '/p.jpg' } };
+  const payload = { results: [video], pagination: { page: 2, pageCount: 3 } };
   const result = await fetchVideos('https://example.test/videos', async () => ({
     ok: true,
     json: async () => payload,
   }));
 
-  assert.equal(result, payload);
+  assert.deepEqual(result, { videos: [video], page: 2, pageCount: 3 });
+});
+
+test('rejects malformed payloads and filters incomplete video entries', () => {
+  assert.throws(() => normalizeVideosResponse({ results: [] }), /invalid response/);
+  const result = normalizeVideosResponse({
+    results: [{ id: 1 }, { id: 2, city: 'Казань', video: { url: '/v' }, poster: { url: '/p' } }],
+    pagination: {},
+  });
+  assert.equal(result.videos.length, 1);
+  assert.equal(result.videos[0].id, 2);
 });
 
 test('throws an actionable error for an unsuccessful response', async () => {
