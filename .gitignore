@@ -1,7 +1,6 @@
 # Project references and local agent rules must stay outside the repository.
 *.fig
 *.pdf
-**/.cursorrules
 
 # Generated files
 **/node_modules/
