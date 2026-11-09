@@ -1,6 +1,10 @@
 export const API_BASE_URL = 'https://v-content.practicum-team.ru';
 export const DEFAULT_PAGE_SIZE = 5;
 
+export function hasNextPage({ page, pageCount }) {
+  return page < pageCount;
+}
+
 export function normalizeVideosResponse(payload) {
   if (!payload || !Array.isArray(payload.results) || !payload.pagination) {
     throw new Error('Video API returned an invalid response');

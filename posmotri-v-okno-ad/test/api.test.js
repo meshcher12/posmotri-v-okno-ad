@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildVideosUrl, fetchVideos, normalizeVideosResponse, readSearchFilters } from '../scripts/api.js';
+import { buildVideosUrl, fetchVideos, hasNextPage, normalizeVideosResponse, readSearchFilters } from '../scripts/api.js';
 
 test('reads the optional city and multiple time filters from form data', () => {
   const formData = new FormData();
@@ -29,6 +29,11 @@ test('returns normalized videos and pagination for a successful response', async
   }));
 
   assert.deepEqual(result, { videos: [video], page: 2, pageCount: 3 });
+});
+
+test('detects whether another result page is available', () => {
+  assert.equal(hasNextPage({ page: 1, pageCount: 2 }), true);
+  assert.equal(hasNextPage({ page: 2, pageCount: 2 }), false);
 });
 
 test('rejects malformed payloads and filters incomplete video entries', () => {
