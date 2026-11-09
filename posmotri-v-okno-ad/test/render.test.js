@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { renderVideoCard, setMainVideo } from '../scripts/render.js';
+import { renderVideoCard, setCurrentCard, setMainVideo } from '../scripts/render.js';
 
 function makeTemplate() {
   const elements = {
@@ -30,6 +30,24 @@ test('renders card text as text and resolves media URLs', () => {
   assert.equal(template.elements['.content__video-card-title'].textContent, '<script>alert(1)</script>');
   assert.equal(template.elements['.content__video-card-thumbnail'].src, 'https://example.test/images/7.jpg');
   assert.equal(template.elements['.content__video-card-thumbnail'].loading, 'lazy');
+});
+
+test('keeps one card current and exposes the state accessibly', () => {
+  const cards = ['one', 'two'].map(() => ({
+    attributes: {},
+    classes: new Set(),
+    classList: { toggle(name, enabled) { enabled ? this.owner.classes.add(name) : this.owner.classes.delete(name); } },
+    setAttribute(name, value) { this.attributes[name] = value; },
+    removeAttribute(name) { delete this.attributes[name]; },
+  }));
+  cards.forEach((card) => { card.classList.owner = card; });
+
+  setCurrentCard(cards, cards[1]);
+
+  assert.equal(cards[0].classes.has('content__card-link_current'), false);
+  assert.equal(cards[1].classes.has('content__card-link_current'), true);
+  assert.equal(cards[1].attributes['aria-current'], 'true');
+  assert.equal(cards[0].attributes['aria-current'], undefined);
 });
 
 test('updates the main video and its poster together', () => {
