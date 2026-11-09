@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildVideosUrl, fetchVideos, hasNextPage, normalizeVideosResponse, readSearchFilters } from '../scripts/api.js';
+import { buildVideosUrl, createRequestGate, fetchVideos, hasNextPage, normalizeVideosResponse, readSearchFilters } from '../scripts/api.js';
 
 test('reads the optional city and multiple time filters from form data', () => {
   const formData = new FormData();
@@ -29,6 +29,15 @@ test('returns normalized videos and pagination for a successful response', async
   }));
 
   assert.deepEqual(result, { videos: [video], page: 2, pageCount: 3 });
+});
+
+test('invalidates responses from superseded requests', () => {
+  const gate = createRequestGate();
+  const firstRequest = gate.next();
+  const secondRequest = gate.next();
+
+  assert.equal(gate.isCurrent(firstRequest), false);
+  assert.equal(gate.isCurrent(secondRequest), true);
 });
 
 test('detects whether another result page is available', () => {

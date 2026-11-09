@@ -1,6 +1,19 @@
 export const API_BASE_URL = 'https://v-content.practicum-team.ru';
 export const DEFAULT_PAGE_SIZE = 5;
 
+export function createRequestGate() {
+  let requestId = 0;
+  return {
+    next() {
+      requestId += 1;
+      return requestId;
+    },
+    isCurrent(id) {
+      return id === requestId;
+    },
+  };
+}
+
 export function hasNextPage({ page, pageCount }) {
   return page < pageCount;
 }
