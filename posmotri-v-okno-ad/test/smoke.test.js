@@ -14,3 +14,9 @@ test('document includes the main video, search form, and card list', () => {
   assert.match(html, /class="search-form"/);
   assert.match(html, /class="content__list"/);
 });
+
+test('dynamic content has accessible status and error announcements', () => {
+  assert.match(html, /aria-live="polite" aria-busy="false"/);
+  assert.match(html, /class="error" role="alert"/);
+  assert.match(html, /<script type="module" src="\.\/scripts\/script\.js"><\/script>/);
+});

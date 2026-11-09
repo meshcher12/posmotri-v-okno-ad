@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { renderVideoCard, setCurrentCard, setMainVideo } from '../scripts/render.js';
+import { renderVideoCard, renderVideoCards, setCurrentCard, setMainVideo } from '../scripts/render.js';
 
 function makeTemplate() {
   const elements = {
@@ -16,6 +16,29 @@ function makeTemplate() {
     },
   };
 }
+
+test('appends every result card to the list in one fragment', () => {
+  const previousDocument = globalThis.document;
+  globalThis.document = {
+    createDocumentFragment() {
+      return { children: [], append(child) { this.children.push(child); } };
+    },
+  };
+  const template = makeTemplate();
+  const list = { children: [], append(fragment) { this.children.push(...fragment.children); } };
+  const videos = [1, 2].map((id) => ({
+    id,
+    city: `Город ${id}`,
+    thumbnail: { url: `/image-${id}.jpg` },
+  }));
+
+  try {
+    renderVideoCards(videos, template, list, 'https://example.test');
+    assert.equal(list.children.length, 2);
+  } finally {
+    globalThis.document = previousDocument;
+  }
+});
 
 test('renders card text as text and resolves media URLs', () => {
   const template = makeTemplate();
