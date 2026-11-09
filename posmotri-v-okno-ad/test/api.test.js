@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildVideosUrl, fetchVideos, normalizeVideosResponse } from '../scripts/api.js';
+import { buildVideosUrl, fetchVideos, normalizeVideosResponse, readSearchFilters } from '../scripts/api.js';
+
+test('reads the optional city and multiple time filters from form data', () => {
+  const formData = new FormData();
+  formData.append('city', '  Псков  ');
+  formData.append('time', 'morning');
+  formData.append('time', 'night');
+
+  assert.deepEqual(readSearchFilters(formData), { city: 'Псков', timeSlots: ['morning', 'night'] });
+});
 
 test('builds the default first-page API URL', () => {
   const url = buildVideosUrl();

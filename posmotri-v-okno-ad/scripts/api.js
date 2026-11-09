@@ -25,6 +25,13 @@ export async function fetchVideos(url, fetchImpl = fetch) {
   return normalizeVideosResponse(await response.json());
 }
 
+export function readSearchFilters(formData) {
+  return {
+    city: String(formData.get('city') ?? '').trim(),
+    timeSlots: formData.getAll('time').map(String),
+  };
+}
+
 export function buildVideosUrl({
   baseUrl = API_BASE_URL,
   city = '',
