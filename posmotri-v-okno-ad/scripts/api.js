@@ -1,6 +1,14 @@
 export const API_BASE_URL = 'https://v-content.practicum-team.ru';
 export const DEFAULT_PAGE_SIZE = 5;
 
+export async function fetchVideos(url, fetchImpl = fetch) {
+  const response = await fetchImpl(url);
+  if (!response.ok) {
+    throw new Error(`Video request failed with status ${response.status}`);
+  }
+  return response.json();
+}
+
 export function buildVideosUrl({
   baseUrl = API_BASE_URL,
   city = '',

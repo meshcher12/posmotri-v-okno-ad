@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildVideosUrl } from '../scripts/api.js';
+import { buildVideosUrl, fetchVideos } from '../scripts/api.js';
 
 test('builds the default first-page API URL', () => {
   const url = buildVideosUrl();
@@ -9,6 +9,23 @@ test('builds the default first-page API URL', () => {
   assert.equal(url.pathname, '/api/videos');
   assert.equal(url.searchParams.get('pagination[pageSize]'), '5');
   assert.equal(url.searchParams.get('pagination[page]'), '1');
+});
+
+test('returns parsed JSON for a successful response', async () => {
+  const payload = { results: [] };
+  const result = await fetchVideos('https://example.test/videos', async () => ({
+    ok: true,
+    json: async () => payload,
+  }));
+
+  assert.equal(result, payload);
+});
+
+test('throws an actionable error for an unsuccessful response', async () => {
+  await assert.rejects(
+    fetchVideos('https://example.test/videos', async () => ({ ok: false, status: 503 })),
+    /status 503/
+  );
 });
 
 test('encodes city and appends each selected time slot', () => {
